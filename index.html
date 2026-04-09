@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INFINITY QUEST ✨</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: linear-gradient(135deg, #ffe0f7 0%, #e8d5ff 40%, #d0eeff 100%);
+    background-attachment: fixed;
+    color: #4a2060;
+    font-family: 'M PLUS Rounded 1c', 'Hiragino Maru Gothic Pro', 'BIZ UDPGothic', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 背景の星デコ */
+  body::before {
+    content: '✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦';
+    position: fixed;
+    top: 10px; left: 0; right: 0;
+    text-align: center;
+    font-size: 1rem;
+    color: #e8a0d8;
+    opacity: 0.5;
+    pointer-events: none;
+    letter-spacing: 0.2em;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 680px;
+    padding: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── 共通カード ── */
+  .card {
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(8px);
+    border: 3px solid #f0a0e0;
+    border-radius: 24px;
+    padding: 28px 32px;
+    box-shadow: 0 8px 32px #e0a0d040, 0 2px 8px #c080c020;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2.4rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, #ff6ec7, #a855f7, #60c0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 2px 4px #f0a0e060);
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #c040a0;
+    margin-bottom: 18px;
+    border-bottom: 3px dashed #f0c0e8;
+    padding-bottom: 8px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #c080c0;
+    margin-bottom: 24px;
+    font-size: 1rem;
+  }
+
+  /* ── ボタン ── */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    background: linear-gradient(135deg, #fff0fb, #f0e8ff);
+    border: 2px solid #e0a0d0;
+    border-radius: 50px;
+    color: #803090;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s;
+    box-shadow: 0 3px 0 #d090c0;
+  }
+  .btn:hover {
+    background: linear-gradient(135deg, #ffe0f8, #e8d8ff);
+    border-color: #c060b0;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #d090c0;
+  }
+  .btn:active { transform: translateY(1px); box-shadow: 0 2px 0 #d090c0; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn.primary {
+    background: linear-gradient(135deg, #ff80d0, #c060f0);
+    border: none;
+    color: #fff;
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 800;
+    box-shadow: 0 4px 0 #a030c0, 0 6px 20px #e060c040;
+    letter-spacing: 0.05em;
+  }
+  .btn.primary:hover {
+    background: linear-gradient(135deg, #ff90d8, #d070ff);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #a030c0, 0 8px 24px #e060c060;
+  }
+
+  .btn.danger {
+    border-color: #ff8080;
+    color: #d03060;
+    background: linear-gradient(135deg, #fff0f0, #ffe0f0);
+  }
+  .btn.danger:hover { background: linear-gradient(135deg, #ffe0e0, #ffd0e8); }
+
+  /* ── 入力 ── */
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 18px;
+    background: #fff0fb;
+    border: 2px solid #e0a0d0;
+    border-radius: 50px;
+    color: #4a2060;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 700;
+    margin-bottom: 18px;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]::placeholder { color: #d0a0c8; }
+  input[type="text"]:focus {
+    outline: none;
+    border-color: #c060b0;
+    box-shadow: 0 0 0 3px #f0a0e040;
+  }
+
+  /* ── ステータス表示 ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .stat-box {
+    background: linear-gradient(135deg, #fff0fb, #f0e8ff);
+    border: 2px solid #e8b0e0;
+    border-radius: 16px;
+    padding: 10px 14px;
+    text-align: center;
+  }
+  .stat-box .label { font-size: 0.75rem; color: #c070b0; font-weight: 700; }
+  .stat-box .value { font-size: 1.6rem; color: #a030c0; font-weight: 800; }
+
+  /* ── HP バー ── */
+  .hp-bar-wrap { margin: 8px 0 4px; }
+  .hp-bar-bg {
+    background: #f0d8f0;
+    border: 2px solid #e0b0d8;
+    border-radius: 50px;
+    height: 16px;
+    overflow: hidden;
+  }
+  .hp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff6060, #ff9090);
+    transition: width 0.3s;
+    border-radius: 50px;
+  }
+  .hp-bar-fill.high { background: linear-gradient(90deg, #ff80c8, #c060f0); }
+  .hp-bar-fill.mid  { background: linear-gradient(90deg, #ffb060, #ffdd60); }
+
+  /* ── ログ ── */
+  #battle-log {
+    background: #fff8fe;
+    border: 2px solid #e8b0e0;
+    border-radius: 16px;
+    padding: 12px 14px;
+    height: 140px;
+    overflow-y: auto;
+    margin: 14px 0;
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+  #battle-log p { margin: 0; }
+  #battle-log p.hit   { color: #e03080; }
+  #battle-log p.heal  { color: #40b060; }
+  #battle-log p.info  { color: #c080c0; font-style: italic; }
+  #battle-log p.crit  { color: #a020c0; font-weight: bold; }
+
+  /* ── クラス選択 ── */
+  .class-options { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .class-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 16px 10px;
+    background: linear-gradient(135deg, #fff0fb, #f0e8ff);
+    border: 3px solid #e8b0e0;
+    border-radius: 20px;
+    color: #803090;
+    cursor: pointer;
+    text-align: center;
+    font-family: inherit;
+    font-weight: 700;
+    transition: all 0.18s;
+    box-shadow: 0 3px 0 #d890c8;
+  }
+  .class-btn:hover {
+    border-color: #c060b0;
+    background: linear-gradient(135deg, #ffe8f8, #e8d8ff);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 0 #d890c8;
+  }
+  .class-btn.selected {
+    border-color: #c040a0;
+    background: linear-gradient(135deg, #ffd8f5, #e0c8ff);
+    box-shadow: 0 0 0 3px #f0a0e060, 0 3px 0 #d890c8;
+  }
+  .class-btn .icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+  .class-btn .name { font-size: 1rem; color: #a030c0; font-weight: 800; }
+  .class-btn .desc { font-size: 0.72rem; color: #c080b0; margin-top: 4px; }
+
+  /* ── ストーリーテキスト ── */
+  #story-text {
+    line-height: 1.9;
+    margin-bottom: 20px;
+    min-height: 80px;
+    font-size: 1rem;
+    color: #503070;
+  }
+
+  /* ── ダイス結果 ── */
+  #dice-result {
+    text-align: center;
+    font-size: 1.6rem;
+    color: #c040a0;
+    min-height: 48px;
+    margin: 10px 0;
+    font-weight: 800;
+    background: linear-gradient(90deg, #ff6ec7, #a855f7, #60c0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── エンディング ── */
+  #ending-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  #ending-text { line-height: 1.9; margin-bottom: 24px; color: #503070; }
+
+  .char-name-display { color: #c040a0; font-weight: 800; }
+
+  /* ── 戦闘 combatants ── */
+  .combatants {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .combatant-box {
+    background: linear-gradient(135deg, #fff0fb, #f0e8ff);
+    border: 2px solid #e8b0e0;
+    border-radius: 16px;
+    padding: 12px;
+  }
+  .combatant-box .cname { font-size: 0.85rem; color: #c080c0; font-weight: 700; margin-bottom: 4px; }
+  .combatant-box .chp   { font-size: 1.1rem; color: #803090; font-weight: 800; }
+
+  /* ── タイトル装飾 ── */
+  .title-deco {
+    text-align: center;
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+    letter-spacing: 0.3em;
+    filter: drop-shadow(0 2px 6px #e0a0d0);
+  }
+
+  /* ── ラベル ── */
+  label { color: #c070b0 !important; font-weight: 700; font-size: 0.85rem; }
+
+  /* スクロールバー */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #f8e8f8; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: #e0a0d0; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== TITLE ===== -->
+  <section id="screen-title" class="screen active">
+    <div class="card">
+      <img src="title.png" alt="INFINITY QUEST" style="display:block; width:100%; max-width:520px; margin:0 auto 4px;">
+      <p class="subtitle">〜 虹の王国を救う物語 〜</p>
+      <div class="title-deco">🌈🌸💎🌸🌈</div>
+      <p style="text-align:center; margin-bottom:24px; color:#c080c0; font-weight:700;">
+        虹の王国に古竜が現れた！<br>
+        ユニコーンの祝福を受けた勇者よ、<br>
+        みんなを守るために旅に出よう✨
+      </p>
+      <button class="btn primary" onclick="showScreen('screen-create')">🦄 ぼうけんをはじめる！</button>
+    </div>
+  </section>
+
+  <!-- ===== CHARACTER CREATION ===== -->
+  <section id="screen-create" class="screen">
+    <div class="card">
+      <h2>✨ キャラクターをつくろう！</h2>
+
+      <label style="font-size:0.85rem; display:block; margin-bottom:6px;">🌸 ぼうけん者のなまえ</label>
+      <input type="text" id="char-name" placeholder="なまえをいれてね..." maxlength="16">
+
+      <label style="display:block; margin-bottom:10px;">💎 しょくぎょうをえらぼう！</label>
+      <div class="class-options">
+        <button class="class-btn" onclick="selectClass('warrior')" id="cls-warrior">
+          <span class="icon">⚔️</span>
+          <span class="name">戦士</span>
+          <span class="desc">HP高い<br>攻防バランス型</span>
+        </button>
+        <button class="class-btn" onclick="selectClass('mage')" id="cls-mage">
+          <span class="icon">🔮</span>
+          <span class="name">魔法使い</span>
+          <span class="desc">魔力特化<br>HPは低め</span>
+        </button>
+        <button class="class-btn" onclick="selectClass('rogue')" id="cls-rogue">
+          <span class="icon">🗡️</span>
+          <span class="name">盗賊</span>
+          <span class="desc">素早く器用<br>クリティカル率高</span>
+        </button>
+      </div>
+
+      <div id="stat-preview" style="display:none;">
+        <div class="stats-grid">
+          <div class="stat-box"><div class="label">HP</div><div class="value" id="s-hp">-</div></div>
+          <div class="stat-box"><div class="label">攻撃力</div><div class="value" id="s-atk">-</div></div>
+          <div class="stat-box"><div class="label">防御力</div><div class="value" id="s-def">-</div></div>
+          <div class="stat-box"><div class="label">魔力</div><div class="value" id="s-mag">-</div></div>
+        </div>
+        <button class="btn" onclick="rollStats()" style="margin-bottom:14px;">🎲 さいころでふりなおす！</button>
+        <div id="dice-result"></div>
+      </div>
+
+      <button class="btn primary" id="start-btn" onclick="startGame()" style="margin-top:10px;" disabled>
+        🌈 ぼうけんへ出発！✨
+      </button>
+    </div>
+  </section>
+
+  <!-- ===== ADVENTURE ===== -->
+  <section id="screen-adventure" class="screen">
+    <div class="card">
+      <!-- キャラ情報ヘッダ -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <span id="adv-char-name" style="color:#ffd700; font-size:1.1rem;"></span>
+        <span id="adv-hp" style="color:#e8d5a3; font-size:0.95rem;"></span>
+      </div>
+      <div class="hp-bar-wrap">
+        <div class="hp-bar-bg"><div class="hp-bar-fill high" id="adv-hp-bar" style="width:100%"></div></div>
+      </div>
+
+      <h2 id="scene-title" style="margin-top:18px;"></h2>
+      <p id="story-text"></p>
+      <div id="dice-result"></div>
+      <div id="choice-buttons"></div>
+    </div>
+  </section>
+
+  <!-- ===== BATTLE ===== -->
+  <section id="screen-battle" class="screen">
+    <div class="card">
+      <h2 id="battle-title">⚔ 戦闘！</h2>
+
+      <div class="combatants">
+        <div class="combatant-box">
+          <div class="cname" id="bt-player-name"></div>
+          <div class="chp" id="bt-player-hp"></div>
+          <div class="hp-bar-wrap">
+            <div class="hp-bar-bg"><div class="hp-bar-fill high" id="bt-player-bar" style="width:100%"></div></div>
+          </div>
+          <div style="font-size:0.8rem; color:#a09070; margin-top:6px;">
+            ATK:<span id="bt-player-atk"></span> DEF:<span id="bt-player-def"></span>
+          </div>
+        </div>
+        <div class="combatant-box">
+          <div class="cname" id="bt-enemy-name"></div>
+          <div class="chp" id="bt-enemy-hp"></div>
+          <div class="hp-bar-wrap">
+            <div class="hp-bar-bg"><div class="hp-bar-fill high" id="bt-enemy-bar" style="width:100%"></div></div>
+          </div>
+          <div style="font-size:0.8rem; color:#a09070; margin-top:6px;">
+            ATK:<span id="bt-enemy-atk"></span> DEF:<span id="bt-enemy-def"></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="battle-log"></div>
+
+      <div id="battle-actions">
+        <button class="btn" onclick="battleAction('attack')">⚔ 攻撃する</button>
+        <button class="btn" onclick="battleAction('defend')">🛡 防御する（このターンDEF+3）</button>
+        <button class="btn danger" onclick="battleAction('flee')">💨 逃走する（成功率 40%）</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ENDING ===== -->
+  <section id="screen-ending" class="screen">
+    <div class="card">
+      <div id="ending-title"></div>
+      <p id="ending-text"></p>
+      <button class="btn primary" onclick="restartGame()">🦄 もう一度あそぶ！</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ===========================
+//  DATA
+// ===========================
+const CLASS_DATA = {
+  warrior: { name: '戦士',    icon: '⚔️',  baseHP: 30, baseATK: 8, baseDEF: 5, baseMAG: 1 },
+  mage:    { name: '魔法使い', icon: '🔮', baseHP: 20, baseATK: 4, baseDEF: 2, baseMAG: 10 },
+  rogue:   { name: '盗賊',    icon: '🗡️',  baseHP: 25, baseATK: 6, baseDEF: 3, baseMAG: 3 },
+};
+
+const ENEMIES = {
+  goblin: { name: 'スパークリン', icon: '🧚', hp: 18, maxHp: 18, atk: 4, def: 1, exp: 30 },
+  wolf:   { name: 'グリッターウルフ', icon: '🐾', hp: 22, maxHp: 22, atk: 6, def: 2, exp: 50 },
+  dragon: { name: 'ピンクドラゴン・ルルベル', icon: '🌸', hp: 45, maxHp: 45, atk: 10, def: 4, exp: 200 },
+};
+
+// ===========================
+//  STATE
+// ===========================
+let player = null;
+let currentScene = null;
+let battleState = null;
+let postBattleScene = null;
+
+// ===========================
+//  SCENES
+// ===========================
+const SCENES = {
+  prologue: {
+    title: '── プロローグ ──',
+    text: () => `${player.name}！ピンクドラゴンのルルベルが虹の山脈でめざめて、キラキラパウダーをばらまいて大さわぎをおこしているよ！🌈 女王さまから討伐のおねがいが届いた。まずはどちらへ向かう？`,
+    choices: [
+      { label: '🌲 南の森を抜けて山へ向かう',   next: 'forest_path' },
+      { label: '🏘 まず近くの村に立ち寄る',       next: 'village' },
+    ],
+  },
+
+  village: {
+    title: '── 村 ──',
+    text: () => `村人たちは怯えているが、老婆が${player.name}に回復薬を渡してくれた。<br><em style="color:#2ecc71">HPが5回復した！</em>`,
+    onEnter: () => { healPlayer(5); },
+    choices: [
+      { label: '🌲 森を抜けて山へ向かう', next: 'forest_path' },
+    ],
+  },
+
+  forest_path: {
+    title: '── 南の森 ──',
+    text: () => `きらきら光る森の中を進んでいると、茂みがゆれた。悪いようせい・スパークリンが飛び出してきた！✨`,
+    choices: [
+      { label: '⚔ 戦う！', battle: 'goblin', next: 'forest_after', flee_next: 'forest_flee' },
+      { label: '🏃 走って逃げる（DEX判定）', diceCheck: { dc: 10, stat: 'agi', pass: 'forest_after', fail: 'forest_goblin_caught' } },
+    ],
+  },
+
+  forest_goblin_caught: {
+    title: '── 逃げ損ねた！ ──',
+    text: () => `足がもつれて転んでしまった！スパークリンに追いつかれちゃった！`,
+    choices: [
+      { label: '⚔ 戦う！', battle: 'goblin', next: 'forest_after', flee_next: 'game_over_flee' },
+    ],
+  },
+
+  forest_flee: {
+    title: '── 逃走成功 ──',
+    text: () => `うまく逃げ切ったが、別ルートを通ったため時間をロスした。<br>体力を少し消耗した。<em style="color:#e74c3c">HPが3減少。</em>`,
+    onEnter: () => { damagePlayer(3, false); },
+    choices: [
+      { label: '🏔 そのまま山へ向かう', next: 'mountain_path' },
+    ],
+  },
+
+  forest_after: {
+    title: '── 戦闘後 ──',
+    text: () => `ゴブリンを倒した。しばらく進むと、洞窟の入口が見えてきた。内部から光が漏れている。`,
+    choices: [
+      { label: '🕯 洞窟に入る',      next: 'cave' },
+      { label: '🏔 山頂を目指す',     next: 'mountain_path' },
+    ],
+  },
+
+  cave: {
+    title: '── 洞窟 ──',
+    text: () => `洞窟の奥でグリッターウルフがねていた。足元にキラキラした宝箱が見える💎`,
+    choices: [
+      { label: '⚔ グリッターウルフをたおして宝箱を開ける', battle: 'wolf', next: 'cave_treasure', flee_next: 'mountain_path' },
+      { label: '🥾 そっとわきを通りぬける（判定）', diceCheck: { dc: 12, stat: 'agi', pass: 'cave_sneak', fail: 'cave_wolf_wake' } },
+    ],
+  },
+
+  cave_wolf_wake: {
+    title: '── 狼が目覚めた！ ──',
+    text: () => `音を立ててしまった！グリッターウルフがめをさましてうなり声をあげた！🐾`,
+    choices: [
+      { label: '⚔ 戦う！', battle: 'wolf', next: 'cave_treasure', flee_next: 'mountain_path' },
+    ],
+  },
+
+  cave_sneak: {
+    title: '── 忍び足成功 ──',
+    text: () => `グリッターウルフに気づかれずに宝箱を開けると、中にキラキラの回復ポーションが入っていた✨<br><em style="color:#40b060">HPが10回復！🌿</em>`,
+    onEnter: () => { healPlayer(10); },
+    choices: [
+      { label: '🏔 山頂を目指す', next: 'mountain_path' },
+    ],
+  },
+
+  cave_treasure: {
+    title: '── 宝箱 ──',
+    text: () => `グリッターウルフをたおし、宝箱を開けると✨ジュエルソード✨が入っていた！<br><em style="color:#c040a0">こうげき力が+3アップ！💎</em>`,
+    onEnter: () => { player.atk += 3; },
+    choices: [
+      { label: '🏔 山頂を目指す', next: 'mountain_path' },
+    ],
+  },
+
+  mountain_path: {
+    title: '── 山頂への道 ──',
+    text: () => `虹のかかった山道をのぼっていくと、山頂のどうくつが見えてきた。中からピンクのかがやきが漏れてくる。ピンクドラゴン・ルルベルがいる！${player.name}はゆうきを出して足を踏み入れた🌈`,
+    choices: [
+      { label: '🌸 ルルベルとむかいあう！', next: 'dragon_encounter' },
+    ],
+  },
+
+  dragon_encounter: {
+    title: '── ピンクドラゴン・ルルベル ──',
+    text: () => `「あら、ちっちゃなぼうけん者ね💅 わたしのキラキラパウダーであなたもキラキラにしてあげる！」\nおおきなピンクのつばさが広がり、キラキラが吹き荒れる🌸✨`,
+    choices: [
+      { label: '✨ 全力でいどむ！', battle: 'dragon', next: 'victory', flee_next: 'game_over_flee' },
+    ],
+  },
+
+  victory: {
+    title: '── 勝利 ──',
+    text: () => `見事！`,
+    isEnding: true,
+    endingType: 'win',
+  },
+
+  game_over_flee: {
+    title: '── 退却 ──',
+    text: () => ``,
+    isEnding: true,
+    endingType: 'flee',
+  },
+};
+
+// ===========================
+//  UTILITIES
+// ===========================
+function rollDice(sides) {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function updateHpBar(fillId, current, max) {
+  const pct = Math.max(0, Math.min(100, (current / max) * 100));
+  const el = document.getElementById(fillId);
+  el.style.width = pct + '%';
+  el.classList.remove('high', 'mid');
+  if (pct > 50) el.classList.add('high');
+  else if (pct > 25) el.classList.add('mid');
+}
+
+function healPlayer(amount) {
+  player.hp = Math.min(player.maxHp, player.hp + amount);
+}
+
+function damagePlayer(amount, log = true) {
+  player.hp = Math.max(0, player.hp - amount);
+}
+
+// ===========================
+//  CHARACTER CREATION
+// ===========================
+let selectedClass = null;
+
+function selectClass(cls) {
+  selectedClass = cls;
+  document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('cls-' + cls).classList.add('selected');
+
+  const base = CLASS_DATA[cls];
+  document.getElementById('s-hp').textContent  = base.baseHP;
+  document.getElementById('s-atk').textContent = base.baseATK;
+  document.getElementById('s-def').textContent = base.baseDEF;
+  document.getElementById('s-mag').textContent = base.baseMAG;
+  document.getElementById('stat-preview').style.display = 'block';
+  document.getElementById('start-btn').disabled = false;
+  document.getElementById('dice-result').textContent = '';
+}
+
+function rollStats() {
+  if (!selectedClass) return;
+  const base = CLASS_DATA[selectedClass];
+  const rolls = [rollDice(4), rollDice(4), rollDice(4), rollDice(4)];
+  const bonus = rolls.reduce((a, b) => a + b, 0) - Math.min(...rolls);
+  const spread = [0, 0, 0, 0].map(() => rollDice(3) - 2);
+
+  const hp  = base.baseHP  + spread[0];
+  const atk = base.baseATK + spread[1];
+  const def = base.baseDEF + spread[2];
+  const mag = base.baseMAG + spread[3];
+
+  document.getElementById('s-hp').textContent  = hp;
+  document.getElementById('s-atk').textContent = atk;
+  document.getElementById('s-def').textContent = def;
+  document.getElementById('s-mag').textContent = mag;
+
+  const diceEl = document.getElementById('dice-result');
+  diceEl.textContent = `🎲 ${rolls.join(' + ')} = ${bonus}`;
+  setTimeout(() => { diceEl.textContent = ''; }, 2000);
+}
+
+function startGame() {
+  const nameInput = document.getElementById('char-name').value.trim();
+  if (!nameInput) { alert('名前を入力してください'); return; }
+  if (!selectedClass) { alert('職業を選んでください'); return; }
+
+  const base  = CLASS_DATA[selectedClass];
+  const hp    = parseInt(document.getElementById('s-hp').textContent);
+  const atk   = parseInt(document.getElementById('s-atk').textContent);
+  const def   = parseInt(document.getElementById('s-def').textContent);
+  const mag   = parseInt(document.getElementById('s-mag').textContent);
+
+  player = {
+    name: nameInput,
+    class: selectedClass,
+    className: base.name,
+    icon: base.icon,
+    hp, maxHp: hp,
+    atk, def, mag,
+    agi: 10 + (selectedClass === 'rogue' ? 4 : selectedClass === 'mage' ? 2 : 0),
+  };
+
+  localStorage.setItem('trpg_player', JSON.stringify(player));
+  goToScene('prologue');
+}
+
+// ===========================
+//  ADVENTURE ENGINE
+// ===========================
+function goToScene(sceneId) {
+  currentScene = sceneId;
+  const scene = SCENES[sceneId];
+  if (!scene) return;
+
+  // onEnter処理
+  if (scene.onEnter) scene.onEnter();
+
+  if (scene.isEnding) {
+    showEnding(scene.endingType);
+    return;
+  }
+
+  // HPが0以下ならゲームオーバー
+  if (player.hp <= 0) {
+    showEnding('dead');
+    return;
+  }
+
+  showScreen('screen-adventure');
+
+  document.getElementById('adv-char-name').textContent = `${player.icon} ${player.name}（${player.className}）`;
+  updateAdventureHP();
+
+  document.getElementById('scene-title').textContent = scene.title;
+  document.getElementById('story-text').innerHTML = scene.text();
+
+  const choiceDiv = document.getElementById('choice-buttons');
+  choiceDiv.innerHTML = '';
+  scene.choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.innerHTML = choice.label;
+    btn.onclick = () => handleChoice(choice);
+    choiceDiv.appendChild(btn);
+  });
+}
+
+function updateAdventureHP() {
+  document.getElementById('adv-hp').textContent = `HP ${player.hp} / ${player.maxHp}`;
+  updateHpBar('adv-hp-bar', player.hp, player.maxHp);
+}
+
+function handleChoice(choice) {
+  // 戦闘遷移
+  if (choice.battle) {
+    postBattleScene = { win: choice.next, flee: choice.flee_next || 'prologue' };
+    startBattle(choice.battle);
+    return;
+  }
+  // ダイス判定
+  if (choice.diceCheck) {
+    const check = choice.diceCheck;
+    const roll = rollDice(20);
+    const statBonus = Math.floor((player[check.stat] - 10) / 2);
+    const total = roll + statBonus;
+    const passed = total >= check.dc;
+
+    const diceEl = document.getElementById('dice-result');
+    diceEl.textContent = `🎲 d20: ${roll} ${statBonus >= 0 ? '+' : ''}${statBonus} = ${total} (目標値: ${check.dc}) → ${passed ? '✅ 成功！' : '❌ 失敗…'}`;
+
+    // ボタンを無効化
+    document.getElementById('choice-buttons').querySelectorAll('button').forEach(b => b.disabled = true);
+
+    setTimeout(() => {
+      diceEl.textContent = '';
+      goToScene(passed ? check.pass : check.fail);
+    }, 1800);
+    return;
+  }
+  // 通常遷移
+  goToScene(choice.next);
+}
+
+// ===========================
+//  BATTLE ENGINE
+// ===========================
+function startBattle(enemyKey) {
+  const template = ENEMIES[enemyKey];
+  battleState = {
+    enemyKey,
+    enemy: { ...template },
+    playerDefending: false,
+    turn: 0,
+    over: false,
+  };
+
+  showScreen('screen-battle');
+  document.getElementById('battle-title').textContent = `⚔ ${template.icon} ${template.name}が現れた！`;
+  document.getElementById('bt-player-name').textContent = `${player.icon} ${player.name}`;
+  document.getElementById('bt-enemy-name').textContent  = `${template.icon} ${template.name}`;
+  document.getElementById('bt-player-atk').textContent = player.atk;
+  document.getElementById('bt-player-def').textContent = player.def;
+  document.getElementById('bt-enemy-atk').textContent  = template.atk;
+  document.getElementById('bt-enemy-def').textContent  = template.def;
+
+  updateBattleUI();
+  setActionsEnabled(true);
+
+  const log = document.getElementById('battle-log');
+  log.innerHTML = '';
+  addLog(`${template.icon} ${template.name}が現れた！`, 'info');
+}
+
+function updateBattleUI() {
+  const e = battleState.enemy;
+  document.getElementById('bt-player-hp').textContent = `HP ${player.hp} / ${player.maxHp}`;
+  document.getElementById('bt-enemy-hp').textContent  = `HP ${e.hp} / ${e.maxHp}`;
+  updateHpBar('bt-player-bar', player.hp, player.maxHp);
+  updateHpBar('bt-enemy-bar', e.hp, e.maxHp);
+}
+
+function addLog(msg, cls = '') {
+  const log = document.getElementById('battle-log');
+  const p = document.createElement('p');
+  if (cls) p.className = cls;
+  p.innerHTML = msg;
+  log.appendChild(p);
+  log.scrollTop = log.scrollHeight;
+}
+
+function setActionsEnabled(enabled) {
+  document.getElementById('battle-actions').querySelectorAll('button').forEach(b => b.disabled = !enabled);
+}
+
+function battleAction(action) {
+  if (battleState.over) return;
+  setActionsEnabled(false);
+
+  battleState.turn++;
+  battleState.playerDefending = false;
+
+  // ── プレイヤーのターン ──
+  if (action === 'flee') {
+    const success = Math.random() < 0.4;
+    if (success) {
+      addLog('💨 逃走に成功した！', 'info');
+      setTimeout(() => endBattle('flee'), 1000);
+      return;
+    } else {
+      addLog('💨 逃走しようとしたが失敗した…！', 'info');
+    }
+  } else if (action === 'defend') {
+    battleState.playerDefending = true;
+    addLog('🛡 防御態勢を取った。（DEF+3）', 'info');
+  } else {
+    // 攻撃
+    const roll  = rollDice(6);
+    const crit  = roll === 6;
+    const dmg   = Math.max(1, player.atk + roll - battleState.enemy.def + (crit ? 4 : 0));
+    battleState.enemy.hp = Math.max(0, battleState.enemy.hp - dmg);
+
+    if (crit) addLog(`⚡ クリティカルヒット！ ${battleState.enemy.name}に ${dmg} ダメージ！`, 'crit');
+    else      addLog(`⚔ ${battleState.enemy.name}に ${dmg} ダメージ！`, 'hit');
+  }
+
+  updateBattleUI();
+
+  // 敵が倒れた
+  if (battleState.enemy.hp <= 0) {
+    addLog(`✨ ${battleState.enemy.name}を倒した！`, 'heal');
+    setTimeout(() => endBattle('win'), 1200);
+    return;
+  }
+
+  // ── 敵のターン ──
+  setTimeout(() => {
+    const eDmgRoll  = rollDice(6);
+    const effectiveDef = player.def + (battleState.playerDefending ? 3 : 0);
+    const eDmg = Math.max(1, battleState.enemy.atk + eDmgRoll - effectiveDef);
+    player.hp = Math.max(0, player.hp - eDmg);
+    addLog(`💥 ${battleState.enemy.name}の攻撃！ ${eDmg} ダメージを受けた。`, 'hit');
+
+    updateBattleUI();
+    // アドベンチャー画面のHP更新
+    if (document.getElementById('adv-hp')) updateAdventureHP();
+
+    if (player.hp <= 0) {
+      addLog('💀 力尽きてしまった…', 'info');
+      setTimeout(() => endBattle('dead'), 1200);
+      return;
+    }
+
+    setActionsEnabled(true);
+  }, 800);
+}
+
+function endBattle(result) {
+  battleState.over = true;
+  if (result === 'win') {
+    goToScene(postBattleScene.win);
+  } else if (result === 'flee') {
+    goToScene(postBattleScene.flee);
+  } else {
+    showEnding('dead');
+  }
+}
+
+// ===========================
+//  ENDING
+// ===========================
+function showEnding(type) {
+  showScreen('screen-ending');
+  const titleEl = document.getElementById('ending-title');
+  const textEl  = document.getElementById('ending-text');
+
+  if (type === 'win') {
+    titleEl.innerHTML = '<span style="background:linear-gradient(90deg,#ff6ec7,#a855f7,#60c0ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">🏆 大かつりょく！✨🦄</span>';
+    textEl.innerHTML  = `
+      <strong class="char-name-display">${player.name}</strong>はみごとにピンクドラゴン・ルルベルをたおした！🎉<br><br>
+      虹の王国に平和がもどり、ユニコーンたちも大よろこび🌈<br>
+      みんなが${player.name}の名まえをよんで、お祝いのパレードがはじまったよ🌸🎠<br><br>
+      <em style="color:#c080c0">✨ きみは虹の王国のヒーロー ✨</em>
+    `;
+  } else if (type === 'dead') {
+    titleEl.innerHTML = '<span style="color:#e060a0;">💫 ゲームオーバー…</span>';
+    textEl.innerHTML  = `
+      <strong class="char-name-display">${player.name}</strong>は力つきてたおれてしまった…💧<br><br>
+      でも大丈夫！ユニコーンの魔法で、また新しいぼうけんができるよ🦄<br>
+      もう一度チャレンジしてみてね💪🌈<br><br>
+      <em style="color:#c080c0">🌸 きみならきっとできる！ 🌸</em>
+    `;
+  } else if (type === 'flee') {
+    titleEl.innerHTML = '<span style="color:#c080c0;">🌸 にげきった！</span>';
+    textEl.innerHTML  = `
+      <strong class="char-name-display">${player.name}</strong>はいったん王国にひきかえした🏃💨<br><br>
+      ユニコーンのひかりにみちびかれて、ぶじにもどってこれたよ🦄✨<br>
+      つぎはもっとつよくなってもどっておいで！🌈<br><br>
+      <em style="color:#c080c0">💎 にげることだって、ゆうきのひとつ 💎</em>
+    `;
+  }
+}
+
+function restartGame() {
+  player = null;
+  selectedClass = null;
+  battleState = null;
+  postBattleScene = null;
+
+  document.getElementById('char-name').value = '';
+  document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('stat-preview').style.display = 'none';
+  document.getElementById('start-btn').disabled = true;
+
+  showScreen('screen-create');
+}
+</script>
+</body>
+</html>
